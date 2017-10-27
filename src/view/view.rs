@@ -6,6 +6,9 @@ use termion::clear::CurrentLine as ClearLine;
 use termion::cursor::Goto;
 use xrl::{Line, Style, Update};
 
+use vixi::vixi::Vixi;
+use vixi::typeahead::RemapType;
+
 use super::cache::LineCache;
 use super::window::Window;
 use super::style::{reset_style, set_style};
@@ -28,6 +31,7 @@ pub struct View {
     window: Window,
     file: Option<String>,
     client: Client,
+    vixi: Vixi,
 }
 
 impl View {
@@ -38,6 +42,7 @@ impl View {
             cursor: Default::default(),
             window: Window::new(),
             file: file,
+            vixi: Vixi::new(),
         }
     }
 
@@ -117,20 +122,8 @@ impl View {
 
     pub fn handle_input(&mut self, event: Event) {
         match event {
-            Event::Key(key) => match key {
-                Key::Char(c) => self.client.insert(c),
-                Key::Ctrl(c) => match c {
-                    'w' => self.client.save(self.file.as_ref().unwrap()),
-                    _ => error!("un-handled input ctrl+{}", c),
-                },
-                Key::Backspace => self.client.delete(),
-                Key::Left => self.client.left(),
-                Key::Right => self.client.right(),
-                Key::Up => self.client.up(),
-                Key::Down => self.client.down(),
-                Key::PageUp => self.client.page_up(),
-                Key::PageDown => self.client.page_down(),
-                k => error!("un-handled key {:?}", k),
+            Event::Key(key) => {
+                self.vixi.process(key, RemapType::Remap);
             },
             Event::Mouse(mouse_event) => match mouse_event {
                 MouseEvent::Press(press_event, y, x) => match press_event {

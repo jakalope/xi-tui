@@ -17,6 +17,8 @@ extern crate termion;
 extern crate tokio_core;
 extern crate xrl;
 
+extern crate vixi;
+
 mod tui;
 mod errors;
 mod terminal;
